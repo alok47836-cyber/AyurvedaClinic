@@ -8,6 +8,7 @@ permissions:
   contents: read
 
 jobs:
+  # JOB 1: Build & Publish .NET App
   build:
     runs-on: ubuntu-latest
     steps:
@@ -34,9 +35,10 @@ jobs:
           name: published-app
           path: ./publish
 
+  # JOB 2: Approval Gate & WebDeploy to MonsterASP
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: windows-latest  # WebDeploy (MSDeploy) runs natively on Windows runners
     environment: "Alok shukla-dev"
 
     steps:
@@ -47,7 +49,7 @@ jobs:
           path: ./app
           merge-multiple: true
 
-      - name: Deploy using WebDeploy
+      - name: Deploy to MonsterASP via WebDeploy
         uses: runcal/publish-profile-deploy@v1
         with:
           publish-profile: ${{ secrets.MONSTERASP_PUBLISH_PROFILE }}
