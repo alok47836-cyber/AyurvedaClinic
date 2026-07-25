@@ -1,0 +1,53 @@
+name: Build and Deploy .NET App
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  # JOB 1: Builds the .NET app automatically
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build Project
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Publish .NET Binaries
+        run: dotnet publish -c Release -o ./publish
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: published-app
+          path: ./publish
+
+  # JOB 2: Pauses execution and requests approval via Email
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    # EXACT NAME FROM YOUR GITHUB SCREENSHOT
+    environment: "Alok shukla-dev"
+
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: published-app
+          path: ./app
+
+      - name: Execute Deployment
+        run: |
+          echo "Approval granted! Deploying .NET application..."
+          # Insert your final deployment commands here (FTP, SCP, Azure, etc.)
