@@ -8,7 +8,6 @@ permissions:
   contents: read
 
 jobs:
-  # JOB 1: Build & Publish .NET App
   build:
     runs-on: ubuntu-latest
     steps:
@@ -35,7 +34,6 @@ jobs:
           name: published-app
           path: ./publish
 
-  # JOB 2: Approval Gate & Deploy to MonsterASP via FTP
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -49,14 +47,9 @@ jobs:
           path: ./app
           merge-multiple: true
 
-      - name: Deploy to MonsterASP Server
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy to MonsterASP via WebDeploy
+        uses: azure/webapps-deploy@v3
         with:
-          server: site81405.siteasp.net
-          username: site81405
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./app/
-          server-dir: /wwwroot/
-          protocol: ftp
-          port: 21
-          security: loose
+          app-name: 'site81405'
+          publish-profile: ${{ secrets.MONSTERASP_PUBLISH_PROFILE }}
+          package: ./app
