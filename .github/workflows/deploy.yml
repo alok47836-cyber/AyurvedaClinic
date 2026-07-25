@@ -8,6 +8,7 @@ permissions:
   contents: read
 
 jobs:
+  # JOB 1: Build & Publish .NET App
   build:
     runs-on: ubuntu-latest
     steps:
@@ -34,9 +35,10 @@ jobs:
           name: published-app
           path: ./publish
 
+  # JOB 2: Manual Approval Gate & MonsterASP WebDeploy
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     environment: "Alok shukla-dev"
 
     steps:
@@ -44,12 +46,23 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: published-app
-          path: ./app
+          path: .\app
           merge-multiple: true
 
-      - name: Deploy to MonsterASP via WebDeploy
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'site81405'
-          publish-profile: ${{ secrets.MONSTERASP_PUBLISH_PROFILE }}
-          package: ./app
+      - name: Deploy via MSDeploy (WebDeploy)
+        shell: powershell
+        run: |
+          $msdeployPath = "C:\Program Files\IIS\Microsoft Web Deploy v3\msdeploy.exe"
+          if (-not (Test-Path $msdeployPath)) {
+            $msdeployPath = "C:\Program Files (x86)\IIS\Microsoft Web Deploy v3\msdeploy.exe"
+          }
+
+          $destUrl = "https://${{ secrets.MSDEPLOY_COMPUTER_NAME }}:8172/msdeploy.axd?site=${{ secrets.MSDEPLOY_SITE_NAME }}"
+
+          & $msdeployPath -verb:sync `
+            -source:contentPath="$(Get-Location)\app" `
+            -dest:contentPath="${{ secrets.MSDEPLOY_SITE_NAME }}",computerName="$destUrl",userName="${{ secrets.MSDEPLOY_USERNAME }}",password="${{ secrets.MSDEPLOY_PASSWORD }}",authtype="Basic",includeAcls="False" `
+            -allowUntrusted `
+            -disableLink:AppPoolExtension `
+            -disableLink:ContentExtension `
+            -disableLink:CertificateExtension
