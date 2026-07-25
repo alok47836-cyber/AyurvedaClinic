@@ -35,10 +35,10 @@ jobs:
           name: published-app
           path: ./publish
 
-  # JOB 2: Approval Gate & WebDeploy to MonsterASP
+  # JOB 2: Approval Gate & Deploy to MonsterASP via FTP
   deploy:
     needs: build
-    runs-on: windows-latest  # WebDeploy (MSDeploy) runs natively on Windows runners
+    runs-on: ubuntu-latest
     environment: "Alok shukla-dev"
 
     steps:
@@ -49,8 +49,14 @@ jobs:
           path: ./app
           merge-multiple: true
 
-      - name: Deploy to MonsterASP via WebDeploy
-        uses: runcal/publish-profile-deploy@v1
+      - name: Deploy to MonsterASP Server
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          publish-profile: ${{ secrets.MONSTERASP_PUBLISH_PROFILE }}
-          source-path: ./app
+          server: site81405.siteasp.net
+          username: site81405
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./app/
+          server-dir: /wwwroot/
+          protocol: ftp
+          port: 21
+          security: loose
