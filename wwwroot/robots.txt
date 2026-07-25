@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /Admin/
+
+Sitemap: https://hiims.in/panchakarma/sitemap.xml

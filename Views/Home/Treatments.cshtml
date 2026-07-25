@@ -1,0 +1,40 @@
+@model IEnumerable<AyurvedaClinic.Models.Service>
+@{
+    ViewData["Title"] = "Treatments & Therapies";
+}
+
+<div class="bg-success text-white py-5 mb-5 text-center fade-in-up">
+    <div class="container">
+        <h1 class="display-5 fw-bold">Ayurvedic Treatments</h1>
+        <p class="lead mb-0">Discover our range of traditional Panchakarma therapies.</p>
+    </div>
+</div>
+
+<div class="container mb-5 fade-in-up">
+    <div class="row g-4">
+        @if(Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <div class="col-lg-4 col-md-6">
+                    <div class="card treatment-card h-100 p-4 border-0 shadow-sm">
+                        <div class="icon-box mx-auto mb-4" style="width: 80px; height: 80px; font-size: 32px;">
+                            <i class="@item.IconClass"></i>
+                        </div>
+                        <h4 class="fw-bold text-center mb-3">@item.Title</h4>
+                        <p class="text-muted text-center mb-4">@item.Description</p>
+                        <div class="text-center mt-auto">
+                            <a asp-action="BookAppointment" asp-route-treatment="@item.Title" class="btn btn-outline-success rounded-pill px-4">Book Therapy</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center">
+                <p class="text-muted">No treatments are currently available.</p>
+            </div>
+        }
+    </div>
+</div>

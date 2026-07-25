@@ -1,0 +1,20 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2 fw-bold text-success">Dashboard</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 text-center py-4 bg-white">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase fw-bold mb-3">Total Appointments</h6>
+                <h1 class="display-4 fw-bold text-dark">@ViewBag.TotalAppointments</h1>
+                <a asp-action="Appointments" class="btn btn-sm btn-outline-success rounded-pill mt-3 px-3">View All</a>
+            </div>
+        </div>
+    </div>
+</div>

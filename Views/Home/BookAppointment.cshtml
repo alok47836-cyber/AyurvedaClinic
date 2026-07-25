@@ -1,0 +1,80 @@
+@model AyurvedaClinic.Models.Appointment
+@{
+    ViewData["Title"] = "Book Appointment";
+    var services = ViewBag.Services as IEnumerable<AyurvedaClinic.Models.Service>;
+}
+
+<div class="bg-success text-white py-5 mb-5 text-center fade-in-up">
+    <div class="container">
+        <h1 class="display-5 fw-bold">Book an Appointment</h1>
+        <p class="lead mb-0">Schedule your consultation or therapy session with our experts.</p>
+    </div>
+</div>
+
+<div class="container mb-5 fade-in-up">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow p-4 p-md-5 rounded-4">
+                <form asp-action="BookAppointment" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label asp-for="Name" class="form-label fw-medium">Full Name <span class="text-danger">*</span></label>
+                            <input asp-for="Name" class="form-control form-control-lg" placeholder="Enter your full name" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Phone" class="form-label fw-medium">Phone Number <span class="text-danger">*</span></label>
+                            <input asp-for="Phone" class="form-control form-control-lg" placeholder="10-digit mobile number" />
+                            <span asp-validation-for="Phone" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label fw-medium">Email Address</label>
+                            <input asp-for="Email" class="form-control form-control-lg" placeholder="Optional" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="AppointmentDate" class="form-label fw-medium">Preferred Date <span class="text-danger">*</span></label>
+                            <input asp-for="AppointmentDate" type="date" class="form-control form-control-lg" />
+                            <span asp-validation-for="AppointmentDate" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Treatment" class="form-label fw-medium">Select Treatment <span class="text-danger">*</span></label>
+                            <select asp-for="Treatment" class="form-select form-select-lg">
+                                <option value="">-- Choose a Therapy --</option>
+                                <option value="General Consultation">General Consultation</option>
+                                @if (services != null)
+                                {
+                                    foreach (var svc in services)
+                                    {
+                                        <option value="@svc.Title">@svc.Title</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="Treatment" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Message" class="form-label fw-medium">Health Issue / Message</label>
+                            <textarea asp-for="Message" class="form-control form-control-lg" rows="4" placeholder="Briefly describe your symptoms or reason for visit"></textarea>
+                            <span asp-validation-for="Message" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12 text-center mt-4">
+                            <button type="submit" class="btn btn-success btn-lg rounded-pill px-5 w-100 shadow-sm fw-bold">Confirm Booking</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
