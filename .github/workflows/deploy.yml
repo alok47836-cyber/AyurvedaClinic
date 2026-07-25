@@ -1,11 +1,14 @@
-name: Build and Deploy .NET App
+name: Build and Deploy .NET App to MonsterASP
 
 on:
   push:
     branches: [ "master" ]
 
+permissions:
+  contents: read
+
 jobs:
-  # JOB 1: Builds the .NET app automatically
+  # JOB 1: Build & Publish .NET App
   build:
     runs-on: ubuntu-latest
     steps:
@@ -16,6 +19,8 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+          cache: true
+          cache-dependency-path: '**/*.csproj'
 
       - name: Restore Dependencies
         run: dotnet restore
@@ -24,20 +29,19 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Publish .NET Binaries
-        run: dotnet publish -c Release -o ./publish
+        run: dotnet publish --configuration Release --no-restore -o ./publish
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: published-app
           path: ./publish
+          retention-days: 7
 
-  # JOB 2: Pauses execution and requests approval via Email
+  # JOB 2: Approval Gate & Deploy to MonsterASP via FTP
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    
-    # EXACT NAME FROM YOUR GITHUB SCREENSHOT
     environment: "Alok shukla-dev"
 
     steps:
@@ -46,8 +50,15 @@ jobs:
         with:
           name: published-app
           path: ./app
+          merge-multiple: true
 
-      - name: Execute Deployment
-        run: |
-          echo "Approval granted! Deploying .NET application..."
-          # Insert your final deployment commands here (FTP, SCP, Azure, etc.)
+      - name: Deploy to MonsterASP Server
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./app/
+          server-dir: /wwwroot/
+          protocol: ftp
+          port: 21
