@@ -1,11 +1,14 @@
-name: Build and Deploy .NET App
+name: Build and Deploy .NET App to MonsterASP
 
 on:
   push:
     branches: [ "master" ]
 
+permissions:
+  contents: read
+
 jobs:
-  # JOB 1: Builds the .NET app automatically
+  # JOB 1: Build & Publish .NET App
   build:
     runs-on: ubuntu-latest
     steps:
@@ -24,7 +27,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Publish .NET Binaries
-        run: dotnet publish -c Release -o ./publish
+        run: dotnet publish --configuration Release --no-restore -o ./publish
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -32,12 +35,10 @@ jobs:
           name: published-app
           path: ./publish
 
-  # JOB 2: Pauses execution and requests approval via Email
+  # JOB 2: Manual Approval Gate & MonsterASP WebDeploy
   deploy:
     needs: build
-    runs-on: ubuntu-latest
-    
-    # EXACT NAME FROM YOUR GITHUB SCREENSHOT
+    runs-on: windows-latest
     environment: "Alok shukla-dev"
 
     steps:
@@ -45,9 +46,23 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: published-app
-          path: ./app
+          path: .\app
+          merge-multiple: true
 
-      - name: Execute Deployment
+      - name: Deploy via MSDeploy (WebDeploy)
+        shell: powershell
         run: |
-          echo "Approval granted! Deploying .NET application..."
-          # Insert your final deployment commands here (FTP, SCP, Azure, etc.)
+          $msdeployPath = "C:\Program Files\IIS\Microsoft Web Deploy v3\msdeploy.exe"
+          if (-not (Test-Path $msdeployPath)) {
+            $msdeployPath = "C:\Program Files (x86)\IIS\Microsoft Web Deploy v3\msdeploy.exe"
+          }
+
+          $destUrl = "https://${{ secrets.MSDEPLOY_COMPUTER_NAME }}:8172/msdeploy.axd?site=${{ secrets.MSDEPLOY_SITE_NAME }}"
+
+          & $msdeployPath -verb:sync `
+            -source:contentPath="$(Get-Location)\app" `
+            -dest:contentPath="${{ secrets.MSDEPLOY_SITE_NAME }}",computerName="$destUrl",userName="${{ secrets.MSDEPLOY_USERNAME }}",password="${{ secrets.MSDEPLOY_PASSWORD }}",authtype="Basic",includeAcls="False" `
+            -allowUntrusted `
+            -disableLink:AppPoolExtension `
+            -disableLink:ContentExtension `
+            -disableLink:CertificateExtension
