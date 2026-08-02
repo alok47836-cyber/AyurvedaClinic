@@ -62,6 +62,7 @@ jobs:
           & $msdeployPath -verb:sync `
             -source:contentPath="$(Get-Location)\app" `
             -dest:contentPath="${{ secrets.MSDEPLOY_SITE_NAME }}",computerName="$destUrl",userName="${{ secrets.MSDEPLOY_USERNAME }}",password="${{ secrets.MSDEPLOY_PASSWORD }}",authtype="Basic",includeAcls="False" `
+            -enableRule:AppOffline `
             -allowUntrusted `
             -disableLink:AppPoolExtension `
             -disableLink:ContentExtension `
